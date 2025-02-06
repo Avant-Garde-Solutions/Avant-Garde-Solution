@@ -6,12 +6,12 @@
     }
 
     body {
-      height: 100vh;
+      height: auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #fff;
-      color: #000;
+      background-image: url('pics\\home.png');
+      width: 100%;
     }
 
     .container {

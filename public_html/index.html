@@ -9,7 +9,7 @@
     
   </style>
 </head>
-<body>
+<body style=" height:auto ;width: auto  ;background-image: url('pics\\home.png')" >
 
 <div class="container">
   <div class="header">Avant-Garde</div>
@@ -28,27 +28,20 @@
     <div class="signup">
       <h2>Sign Up</h2>
       <form>
-        <input type="text" placeholder="Username" required>
+        <input type="text" placeholder="firstName" required>
+        <input type="text" placeholder="lastName" required>
         <input type="email" placeholder="Email" required>
         <input type="password" placeholder="Password" required>
-        <button type="submit">Sign Up</button>
+        <input type="password" placeholder="confirm Password" required>
+        <button type="submit"  >Sign Up</button>
       </form>
     </div>
   </div>
-  <button class="toggle-btn" onclick="toggleSlide()">Toggle to Sign Up</button>
+  <button class="toggle-btn" onclick="toggleSlide()">Sign Up</button>
 </div>
 
-<script>
-  const container = document.querySelector('.form-container');
-  const toggleBtn = document.querySelector('.toggle-btn');
-
-  function toggleSlide() {
-    container.classList.toggle('slide');
-    toggleBtn.textContent = container.classList.contains('slide') 
-      ? 'Toggle to Sign In' 
-      : 'Toggle to Sign Up';
-  }
-</script>
+<script src="CSS and Script\SignS.js">
+ </script>
 
 </body>
 </html>
