@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Events</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .event-list {
+            max-width: 600px;
+            margin: auto;
+        }
+        .event {
+            background: white;
+            color: black;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upcoming Events</h1>
+    <div class="event-list" id="event-list"></div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadEvents() {
+            const eventList = document.getElementById("event-list");
+            const eventsRef = collection(db, "events");
+            const snapshot = await getDocs(eventsRef);
+            const today = new Date();
+            
+            snapshot.forEach(doc => {
+                const event = doc.data();
+                const eventDate = new Date(event.date);
+                if (eventDate >= today) {
+                    const eventElement = document.createElement("div");
+                    eventElement.classList.add("event");
+                    eventElement.innerHTML = `<h2>${event.title}</h2><p>${event.date}</p><p>${event.description}</p>`;
+                    eventList.appendChild(eventElement);
+                }
+            });
+        }
+
+        loadEvents();
+    </script>
+</body>
+</html>
+
