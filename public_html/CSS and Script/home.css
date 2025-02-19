@@ -306,7 +306,7 @@ text-decoration: underline;
 }
 
 .brand {
-    background: #fff;
+    background: grey;
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 10px;
@@ -420,7 +420,7 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: goldenrod;
+    color: White;
     text-align: left;
     font-size: 1em;
     font-weight: bold;

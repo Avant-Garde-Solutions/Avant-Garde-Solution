@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - AVANT-GARDE</title>
+    <link rel="stylesheet" href="CSS and Script\Servicestyle.css">
+</head>
+<body>
+    <header>
+        <div class="banner">
+            <h1>Our Services</h1>
+        </div>
+    </header>
+
+    <main>
+        <section class="tabs">
+            <button class="tab-button active" onclick="openTab('simple')">Simple Packages</button>
+            <button class="tab-button" onclick="openTab('tailored')">Tailored Experiences</button>
+            <button class="tab-button" onclick="openTab('membership')">A-V Membership</button>
+        </section>
+
+        <section id="simple" class="tab-content active">
+            <h2>Simple Packages</h2>
+            <p>Select from our pre-designed packages for a seamless experience.</p>
+            <div class="package">
+                <h3>Silver Package</h3>
+                <p>Basic access to our premium venues with limited perks.</p>
+                <button onclick="addToCart('Silver Package')">Add to Cart</button>
+            </div>
+            <div class="package">
+                <h3>Gold Package</h3>
+                <p>Includes access to exclusive events and VIP lounges.</p>
+                <button onclick="addToCart('Gold Package')">Add to Cart</button>
+            </div>
+        </section>
+
+        <section id="tailored" class="tab-content">
+            <h2>Tailored Experiences</h2>
+            <p>Design your day or night out from our curated options.</p>
+            <button onclick="customizeExperience()">Customize Your Experience</button>
+        </section>
+
+        <section id="membership" class="tab-content">
+            <h2>A-V Membership</h2>
+            <p>This is a premium service only available to A-V exclusive members. Membership is obtained by invitation or by becoming a loyal A-V customer. Only recurring customers aligning with the A-V brand will be given an invitation via the loyal customer method of membership.</p>
+        </section>
+
+        <aside id="cart">
+            <h3>Shopping Cart</h3>
+            <ul id="cart-items"></ul>
+            <button onclick="checkout()">Checkout</button>
+            <p class="cart-message">No unexpected expenses during your night out. Budget accurately with our A-V Wallet!</p>
+        </aside>
+    </main>
+
+ <!-- Footer Section -->
+    <footer>
+        <div class="footer-content">
+            <!-- Address Section -->
+            <div>
+                <h2>Address</h2>
+                <p>E1082 Masosobane,</p>
+                <p>Phokeng, North West, 0335</p>
+            </div>
+
+            <!-- Contact Section -->
+            <div>
+                <h2>Contact</h2>
+                <p>Mobile: 0714667927</p>
+                <p>Email: <a href="mailto:setshedirebone@gmail.com">setshedirebone@gmail.com</a></p>
+            </div>
+
+            <!-- Social Media Section -->
+            <div>
+                <h2>Social Media</h2>
+                <p><a href="https://facebook.com" target="_blank">Facebook</a></p>
+                <p><a href="https://twitter.com" target="_blank">Twitter</a></p>
+                <p><a href="https://instagram.com" target="_blank">Instagram</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 AVANT-GARDE. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function openTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-button');
+
+            contents.forEach(content => content.classList.remove('active'));
+            buttons.forEach(button => button.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`).classList.add('active');
+        }
+
+        function addToCart(item) {
+            const cartItems = document.getElementById('cart-items');
+            const listItem = document.createElement('li');
+            listItem.textContent = item;
+            cartItems.appendChild(listItem);
+            alert(`${item} has been added to your cart.`);
+        }
+
+        function customizeExperience() {
+            alert('Redirecting to tailored experience customization...');
+            location.href= "customize_Experience.html";
+            
+        }
+
+        function checkout() {
+            alert('Proceeding to checkout. Thanks for choosing AVANT-GARDE!');
+        }
+    </script>
+</body>
+</html>
+

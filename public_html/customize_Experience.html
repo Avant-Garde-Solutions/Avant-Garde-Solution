@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Your Experience</title>
+    <link rel="stylesheet" href="CSS and Script\customize.css">
+</head>
+<body>
+    <header>
+        <h1>Customize Your Day or Night Experience</h1>
+    </header>
+
+    <main>
+        <section class="customization-form">
+            <h2>Plan Your Perfect Experience</h2>
+            <form id="experienceForm">
+                <!-- Day or Night Selection -->
+                <label for="timeOfDay">Choose your time:</label>
+                <select id="timeOfDay" name="timeOfDay" required>
+                    <option value="day">Day</option>
+                    <option value="night">Night</option>
+                </select>
+
+                <!-- Activities -->
+                <label for="activity">Select your activity:</label>
+                <select id="activity" name="activity" required>
+                    <option value="brunch">Brunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="clubbing">Clubbing</option>
+                    <option value="networking">Networking</option>
+                </select>
+
+                <!-- Preferred Atmosphere -->
+                <label for="atmosphere">Preferred atmosphere:</label>
+                <select id="atmosphere" name="atmosphere" required>
+                    <option value="relaxed">Relaxed</option>
+                    <option value="vibrant">Vibrant</option>
+                    <option value="luxury">Luxury</option>
+                </select>
+
+                <!-- Submit Button -->
+                <button type="submit" class="cta-button">Show My Experience</button>
+            </form>
+        </section>
+
+        <section id="result" class="result hidden">
+            <h2>Your Customized Experience</h2>
+            <p id="resultText"></p>
+        </section>
+    </main>
+
+   <!-- Footer Section -->
+    <footer>
+        <div class="footer-content">
+            <!-- Address Section -->
+            <div>
+                <h2>Address</h2>
+                <p>E1082 Masosobane,</p>
+                <p>Phokeng, North West, 0335</p>
+            </div>
+
+            <!-- Contact Section -->
+            <div>
+                <h2>Contact</h2>
+                <p>Mobile: 0714667927</p>
+                <p>Email: <a href="mailto:setshedirebone@gmail.com">setshedirebone@gmail.com</a></p>
+            </div>
+
+            <!-- Social Media Section -->
+            <div>
+                <h2>Social Media</h2>
+                <p><a href="https://facebook.com" target="_blank">Facebook</a></p>
+                <p><a href="https://twitter.com" target="_blank">Twitter</a></p>
+                <p><a href="https://instagram.com" target="_blank">Instagram</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 AVANT-GARDE. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="CSS and Script\script.js"></script>
+</body>
+</html>
