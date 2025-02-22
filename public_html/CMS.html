@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard & CMS</title>
+    <link rel="stylesheet" href="CSS and Script\CMs_Css.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Dashboard</h2>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="Analysis.html">Analytics</a></li>
+                <li><a href="User_page.html">Users</a></li>
+                <li><a href="#">CMS</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="LogOut.html">Logout</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <header>
+                <h1>Welcome, User</h1>
+            </header>
+            <section class="widgets">
+                <div class="widget">
+                    <h3>Total Users</h3>
+                    <p id="userCount">0</p>
+                </div>
+                <div class="widget">
+                    <h3>Articles Published</h3>
+                    <p id="articleCount">0</p>
+                </div>
+            </section>
+            <section class="cms">
+                <h2>Content Management</h2>
+                <textarea id="contentEditor" placeholder="Write your content..."></textarea>
+                <button onclick="saveContent()">Save</button>
+            </section>
+        </main>
+    </div>
+    <script src="CSS and Script\CMS_js.js"></script>
+</body>
+</html>
+

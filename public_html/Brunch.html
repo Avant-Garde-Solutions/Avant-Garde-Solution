@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Booking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: black;
+            padding: 10px 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        header h1{
+            color: #ccc;    
+        }
+        .nav-container {
+            flex-grow: 1;
+            text-align: right;
+        }
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: right;
+        }
+        .nav-list li {
+            margin: 0 15px;
+        }
+        .nav-list a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        .nav-list a:hover {
+            color: gold;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-top: 20px;
+        }
+        input, select, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AVANT-GARDE</h1>
+        <ul class="nav-list">
+            <li><a href="HomePage.html">Home</a></li>
+            <li><a href="Service.html">Services</a></li>
+            <li><a href="Affiliate Page.html">Affiliate</a></li>
+            <li><a href="Contact and Onboarding Page.html">Contact</a></li>
+        </ul>
+    </header>
+    <div class="container">
+        <h2>Book Your Meal</h2>
+        <form id="bookingForm">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Your Email" required>
+            <input type="datetime-local" id="dateTime" required>
+            <select id="mealType" required>
+                <option value="">Select Meal Type</option>
+                <option value="Brunch">Brunch</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+            </select>
+            <button type="submit">Book Now</button>
+        </form>
+        <p id="confirmation" style="color: green; font-weight: bold;"></p>
+    </div>
+    <script>
+        document.getElementById('bookingForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const dateTime = document.getElementById('dateTime').value;
+            const mealType = document.getElementById('mealType').value;
+            
+            if (name && email && dateTime && mealType) {
+                document.getElementById('confirmation').innerText = `Thank you, ${name}! Your ${mealType} booking for ${new Date(dateTime).toLocaleString()} has been confirmed.`;
+                document.getElementById('bookingForm').reset();
+            }
+        });
+    </script>
+</body>
+</html>
+

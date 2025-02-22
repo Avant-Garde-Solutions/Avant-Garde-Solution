@@ -7,31 +7,45 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: black;
+            background-color: #121212;
             color: white;
             text-align: center;
             padding: 20px;
         }
-        .event-list {
-            max-width: 600px;
+        .container {
+            max-width: 800px;
             margin: auto;
         }
         .event {
-            background: white;
-            color: black;
+            background: #fff;
+            color: #000;
             padding: 15px;
             margin: 10px 0;
             border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .event button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .event button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
     <h1>Upcoming Events</h1>
-    <div class="event-list" id="event-list"></div>
+    <div class="container">
+        <div class="event-list" id="event-list"></div>
+    </div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
@@ -57,14 +71,34 @@
                 if (eventDate >= today) {
                     const eventElement = document.createElement("div");
                     eventElement.classList.add("event");
-                    eventElement.innerHTML = `<h2>${event.title}</h2><p>${event.date}</p><p>${event.description}</p>`;
+                    eventElement.innerHTML = `
+                        <h2>${event.title}</h2>
+                        <p><strong>Date:</strong> ${event.date}</p>
+                        <p>${event.description}</p>
+                        <button onclick="bookEvent('${doc.id}', '${event.title}')">Book Now</button>
+                    `;
                     eventList.appendChild(eventElement);
                 }
             });
+        }
+
+        async function bookEvent(eventId, eventTitle) {
+            try {
+                await addDoc(collection(db, "bookings"), {
+                    eventId,
+                    eventTitle,
+                    user: "Guest User",
+                    timestamp: new Date().toISOString()
+                });
+                alert("Successfully booked: " + eventTitle);
+            } catch (error) {
+                console.error("Error booking event: ", error);
+            }
         }
 
         loadEvents();
     </script>
 </body>
 </html>
+
 
