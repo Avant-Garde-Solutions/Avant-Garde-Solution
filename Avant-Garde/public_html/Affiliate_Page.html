@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Program - AVANT-GARDE</title>
+    <link rel="stylesheet" href="CSS and Script/affiliate.css">
+    <style>
+        /* Additional inline styles for enhancements */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        #formMessages {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        
+        .brands-grid .loading-text {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+    
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { auth, db, initAuth } from './firebase.js';
+        import { addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+        // Load navbar
+        fetch('./navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.body.insertAdjacentHTML('afterbegin', html);
+                initAuth();
+            });
+
+        // Form Handling
+        document.getElementById('affiliateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formMessages = document.getElementById('formMessages');
+            const submitBtn = document.querySelector('#affiliateForm button[type="submit"]');
+            
+            try {
+                if (!auth.currentUser) {
+                    throw new Error('Please sign in to submit inquiries');
+                }
+
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+                document.getElementById('affiliateForm').classList.add('loading');
+
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    message: document.getElementById('message').value.trim(),
+                    userId: auth.currentUser.uid,
+                    userEmail: auth.currentUser.email,
+                    timestamp: new Date(),
+                    status: "pending"
+                };
+
+                // Validate message length
+                if (formData.message.length < 20) {
+                    throw new Error('Message must be at least 20 characters');
+                }
+
+                await addDoc(collection(db, "affiliateInquiries"), formData);
+
+                // Show success message
+                formMessages.textContent = 'Thank you for your inquiry! We will contact you shortly.';
+                formMessages.className = 'success';
+                formMessages.style.display = 'block';
+                
+                // Reset form
+                document.getElementById('affiliateForm').reset();
+            } catch (error) {
+                console.error("Submission error:", error);
+                formMessages.textContent = `Error: ${error.message}`;
+                formMessages.className = 'error';
+                formMessages.style.display = 'block';
+                if (error.message.includes('sign in')) {
+                    setTimeout(() => window.location.href = 'signin.html', 2000);
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+                document.getElementById('affiliateForm').classList.remove('loading');
+            }
+        });
+
+        // Tabs Functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+                button.classList.add('active');
+
+                if (tabId === 'brands') {
+                    loadBrands();
+                }
+            });
+        });
+
+        // Load Affiliate Brands
+        async function loadBrands() {
+            const brandsGrid = document.querySelector('.brands-grid');
+            try {
+                brandsGrid.innerHTML = '<div class="loading-text">Loading partners...</div>';
+                const brandsSnapshot = await getDocs(collection(db, "affiliateBrands"));
+                
+                brandsGrid.innerHTML = '';
+                brandsSnapshot.forEach(doc => {
+                    const brand = doc.data();
+                    brandsGrid.innerHTML += `
+                        <div class="brand">
+                            <img src="${brand.logoUrl}" alt="${brand.name}" loading="lazy">
+                            <p>${brand.name}</p>
+                            ${brand.website ? `<a href="${brand.website}" target="_blank" class="brand-link">Visit Website</a>` : ''}
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                brandsGrid.innerHTML = '<div class="error">Error loading partners. Please try again later.</div>';
+                console.error("Brands load error:", error);
+            }
+        }
+    </script>
+</head>
+<body>
+    
+    <main>
+        <div id="formMessages"></div>
+        
+        <section class="tabs-section">
+            <button class="tab-button active" data-tab="programs">Affiliate Programs</button>
+            <button class="tab-button" data-tab="brands">Affiliate Brands</button>
+        </section>
+        
+        <section id="programs" class="tab-content active">
+            <h2>Partner with AVANT-GARDE</h2>
+            <p>Join our affiliate program and unlock the opportunity to promote premium nightlife services and experiences.</p>
+            <button onclick="window.location.href='#contact'">Sign Up or Inquire Now</button>
+        </section>
+        
+        <section id="brands" class="tab-content">
+            <h2>Our Partners</h2>
+            <div class="brands-grid"></div>
+        </section>
+        
+        <section id="contact" class="contact-section">
+            <h2>Contact Us</h2>
+            <form id="affiliateForm" action="#" method="POST" class="contact-form">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="5" minlength="20" required></textarea>
+
+                <button type="submit">Submit</button>
+            </form>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div>
+                <h2>Address</h2>
+                <p>E1082 Masosobane, Phokeng, North West, 0335</p>
+            </div>
+            <div>
+                <h2>Contact</h2>
+                <p>Mobile: 0714667927</p>
+                <p>Email: <a href="mailto:setshedirebone@gmail.com">setshedirebone@gmail.com</a></p>
+            </div>
+            <div>
+                <h2>Follow Us</h2>
+                <a href="https://facebook.com" target="_blank">Facebook</a> |
+                <a href="https://twitter.com" target="_blank">Twitter</a> |
+                <a href="https://instagram.com" target="_blank">Instagram</a>
+            </div>
+        </div>
+        <p>&copy; 2025 AVANT-GARDE. All rights reserved.</p>
+    </footer>
+</body>
+</html>

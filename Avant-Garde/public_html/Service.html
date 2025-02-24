@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - AVANT-GARDE</title>
+    <link rel="stylesheet" href="CSS and Script\serviceStyle.css">
+    
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { auth, db, initAuth } from './firebase.js';
+        import { collection, getDocs, getDoc, doc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+        // Load navbar
+        fetch('./navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.body.insertAdjacentHTML('afterbegin', html);
+                initAuth();
+                loadPackages();
+                loadCart();
+            });
+
+        // Modified package loading with event delegation
+        async function loadPackages() {
+            try {
+                const packagesSnap = await getDocs(collection(db, "packageDetails"));
+                const simpleSection = document.getElementById('simple');
+                const container = simpleSection.querySelector('.packages-container');
+                
+                // Clear existing content
+                container.innerHTML = '';
+                
+                // Add event delegation for all package buttons
+                container.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                        const packageId = e.target.dataset.id;
+                        if (packageId) {
+                            addToCart(packageId);
+                        }
+                    }
+                });
+
+                packagesSnap.forEach(doc => {
+                    const sp_package = doc.data();
+                    if(sp_package.type === 'simple') {
+                        const packageDiv = document.createElement('div');
+                        packageDiv.className = 'package';
+                        packageDiv.innerHTML = `
+                            <h3>${sp_package.name}</h3>
+                            <p>${sp_package.description}</p>
+                            <p>Price: ZAR ${sp_package.price}</p>
+                            <button data-id="${doc.id}">Add to Cart</button>
+                        `;
+                        container.appendChild(packageDiv);
+                    }
+                });
+            } catch (error) {
+                console.error("Error loading packages:", error);
+            }
+        }
+
+        // Modified loadCart function with auto-cleanup
+        async function loadCart() {
+            if (!auth.currentUser) return;
+            
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userDoc = await getDoc(userRef);
+                let cartItems = userDoc.data().cart || [];
+                
+                // Cleanup invalid entries
+                const validCartItems = cartItems.filter(itemId => 
+                    typeof itemId === 'string' && itemId.trim() !== ''
+                );
+
+                // Update cart if invalid items were found
+                if (validCartItems.length !== cartItems.length) {
+                    await updateDoc(userRef, {
+                        cart: validCartItems
+                    });
+                    cartItems = validCartItems; // Use cleaned array
+                }
+
+                const cartList = document.getElementById('cart-items');
+                cartList.innerHTML = '';
+                
+                for (const itemId of cartItems) {
+                    try {
+                        const packageDoc = await getDoc(doc(db, "packageDetails", itemId));
+                        if (packageDoc.exists()) {
+                            const li = document.createElement('li');
+                            li.textContent = packageDoc.data().name;
+                            cartList.appendChild(li);
+                        } else {
+                            // Remove non-existent packages from cart
+                            await updateDoc(userRef, {
+                                cart: arrayRemove(itemId)
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error processing item ${itemId}:`, error);
+                    }
+                }
+            } catch (error) {
+                console.error("Cart loading error:", error);
+            }
+        }
+
+        async function addToCart(packageId) {
+            if (!auth.currentUser) {
+                alert('Please sign in to add items to your cart');
+                return;
+            }
+
+            // Validate package ID
+            if (!packageId || typeof packageId !== 'string' || packageId.trim() === '') {
+                console.error('Invalid package ID detected');
+                return;
+            }
+
+            try {
+                // Verify package exists first
+                const packageDoc = await getDoc(doc(db, "packageDetails", packageId));
+                if (!packageDoc.exists()) {
+                    alert('This package is no longer available');
+                    return;
+                }
+
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                
+                // Get FRESH cart data
+                const userDoc = await getDoc(userRef);
+                const currentCart = userDoc.data().cart || [];
+
+                // Check for existing item BEFORE adding
+                if (currentCart.includes(packageId)) {
+                    alert('This package is already in your cart');
+                    return;
+                }
+
+                // Add to cart if validation passes
+                await updateDoc(userRef, {
+                    cart: arrayUnion(packageId)
+                });
+
+                // Visual feedback
+                const button = document.querySelector(`button[data-id="${packageId}"]`);
+                if (button) {
+                    button.textContent = "Added!";
+                    setTimeout(() => {
+                        button.textContent = "Add to Cart";
+                    }, 2000);
+                }
+                
+                loadCart();
+            } catch (error) {
+                console.error("Cart addition error:", error);
+                alert('Error adding item to cart');
+            }
+        }
+
+        window.checkout = async function() {
+            if (!auth.currentUser) {
+                alert('Please sign in to checkout');
+                return;
+            }
+
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const cartItems = (await getDoc(userRef)).data().cart || [];
+                
+                if (cartItems.length === 0) {
+                    alert('Your cart is empty!');
+                    return;
+                }
+
+                // Create order
+                const orderRef = await addDoc(collection(db, "orders"), {
+                    userId: auth.currentUser.uid,
+                    items: cartItems,
+                    total: await calculateTotal(cartItems),
+                    status: "pending",
+                    createdAt: new Date()
+                });
+
+                // Clear cart
+                await updateDoc(userRef, {
+                    cart: []
+                });
+
+                alert(`Order #${orderRef.id} created successfully!`);
+                loadCart();
+            } catch (error) {
+                console.error("Checkout error:", error);
+            }
+        }
+
+        async function calculateTotal(cartItems) {
+            let total = 0;
+            for (const itemId of cartItems) {
+                const packageDoc = await getDoc(doc(db, "packageDetails", itemId));
+                total += packageDoc.data().price;
+            }
+            return total;
+        }
+
+        window.customizeExperience = function() {
+            if (!auth.currentUser) {
+                alert('Please sign in to customize experiences');
+                return;
+            }
+            window.location.href = "customize_Experience.html";
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="banner">
+            <h1>Our Services</h1>
+        </div>
+    </header>
+
+    <main>
+        <section class="tabs">
+            <button class="tab-button active" onclick="openTab('simple')">Simple Packages</button>
+            <button class="tab-button" onclick="openTab('tailored')">Tailored Experiences</button>
+            <button class="tab-button" onclick="openTab('membership')">A-V Membership</button>
+        </section>
+
+        <section id="simple" class="tab-content active">
+            <h2>Simple Packages</h2>
+            <p>Select from our pre-designed packages for a seamless experience.</p>
+            <div class="packages-container"></div>
+        </section>
+
+        <section id="tailored" class="tab-content">
+            <h2>Tailored Experiences</h2>
+            <p>Design your day or night out from our curated options.</p>
+            <button onclick="customizeExperience()">Customize Your Experience</button>
+        </section>
+
+        <section id="membership" class="tab-content">
+            <h2>A-V Membership</h2>
+            <p>This is a premium service only available to A-V exclusive members. Membership is obtained by invitation or by becoming a loyal A-V customer. Only recurring customers aligning with the A-V brand will be given an invitation via the loyal customer method of membership.</p>
+        </section>
+
+        <aside id="cart">
+            <h3>Shopping Cart</h3>
+            <ul id="cart-items"></ul>
+            <button onclick="checkout()">Checkout</button>
+            <p class="cart-message">No unexpected expenses during your night out. Budget accurately with our A-V Wallet!</p>
+        </aside>
+    </main>
+
+ <!-- Footer Section -->
+    <footer>
+        <div class="footer-content">
+            <!-- Address Section -->
+            <div>
+                <h2>Address</h2>
+                <p>E1082 Masosobane,</p>
+                <p>Phokeng, North West, 0335</p>
+            </div>
+
+            <!-- Contact Section -->
+            <div>
+                <h2>Contact</h2>
+                <p>Mobile: 0714667927</p>
+                <p>Email: <a href="mailto:setshedirebone@gmail.com">setshedirebone@gmail.com</a></p>
+            </div>
+
+            <!-- Social Media Section -->
+            <div>
+                <h2>Social Media</h2>
+                <p><a href="https://facebook.com" target="_blank">Facebook</a></p>
+                <p><a href="https://twitter.com" target="_blank">Twitter</a></p>
+                <p><a href="https://instagram.com" target="_blank">Instagram</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 AVANT-GARDE. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab functionality remains in vanilla JS
+        function openTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-button');
+
+            contents.forEach(content => content.classList.remove('active'));
+            buttons.forEach(button => button.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`).classList.add('active');
+        }
+    </script>
+</body>
+</html>
+

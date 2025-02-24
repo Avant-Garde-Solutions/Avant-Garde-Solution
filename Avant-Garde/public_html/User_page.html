@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link rel="stylesheet" href="CSS and Script\user_css.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Dashboard</h2>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Analysis.html">Analytics</a></li>
+                <li><a href="User_page.html">Users</a></li>
+                <li><a href="CMS.html">CMS</a></li>
+                <li><a href="settings.html">Settings</a></li>
+                <li><a href="#">Logout</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <header>
+                <h1>User Management</h1>
+            </header>
+            <section class="user-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const userTableBody = document.getElementById("userTableBody");
+        
+        function fetchUsers() {
+            database.ref("users").on("value", (snapshot) => {
+                userTableBody.innerHTML = "";
+                snapshot.forEach((childSnapshot) => {
+                    const user = childSnapshot.val();
+                    const row = `<tr>
+                        <td>${childSnapshot.key}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            <button onclick="deleteUser('${childSnapshot.key}')">Delete</button>
+                        </td>
+                    </tr>`;
+                    userTableBody.innerHTML += row;
+                });
+            });
+        }
+        
+        function deleteUser(userId) {
+            if (confirm("Are you sure you want to delete this user?")) {
+                database.ref(`users/${userId}`).remove();
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", fetchUsers);
+    </script>
+</body>
+</html>

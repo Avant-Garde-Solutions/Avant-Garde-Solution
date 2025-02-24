@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="CSS and Script/Sign.css">
+  <title>AVANT-GARDE Authentication</title>
+
+  <!-- Firebase Integration -->
+  <script type="module">
+    import { auth, db, initAuth, onAuthStateChanged } from './firebase.js';
+    import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    // Load navbar
+    fetch('./navbar.html')
+      .then(response => response.text())
+      .then(html => {
+        document.body.insertAdjacentHTML('afterbegin', html);
+        initAuth();
+        
+        // Hide auth button on signin page
+        document.getElementById('authButton').style.display = 'none';
+      });
+
+    // Auth State Listener
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'index.html'; 
+      }
+    });
+
+    // Password Reset Handler
+    document.getElementById('forgot-password').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = prompt('Please enter your email address:');
+      if (email) {
+        try {
+          await sendPasswordResetEmail(auth, email);
+          showMessage('Password reset email sent! Check your inbox.', 'success');
+        } catch (error) {
+          showMessage(`Error: ${error.message}`, 'error');
+        }
+      }
+    });
+
+    // Sign Up Handler
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const confirmPassword = document.getElementById('signup-confirm-password').value;
+      const firstName = document.getElementById('signup-fname').value;
+      const lastName = document.getElementById('signup-lname').value;
+
+      if (password !== confirmPassword) {
+        showMessage('Passwords do not match!', 'error');
+        return;
+      }
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          createdAt: new Date(),
+          isMember: false,
+          cart: [],
+          wallet: {
+            balance: 0,
+            currency: "ZAR",
+            lastUpdated: new Date()
+          },
+          preferences: {
+            preferredVenues: [],
+            preferredCategories: [],
+            dietaryRestrictions: "",
+            specialNotes: ""
+          },
+        });
+
+        showMessage('Account created successfully! Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'index.html', 2000);
+      } catch (error) {
+        showMessage(`Error: ${error.message}`, 'error');
+      }
+    });
+
+    // Sign In Handler
+    document.getElementById('signin-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signin-email').value;
+      const password = document.getElementById('signin-password').value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showMessage('Sign in successful! Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'index.html', 1500);
+      } catch (error) {
+        showMessage(`Error: ${error.message}`, 'error');
+      }
+    });
+
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('auth-message');
+      messageDiv.textContent = message;
+      messageDiv.className = `auth-message ${type}`;
+      messageDiv.style.display = 'block';
+      
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 5000);
+    }
+  </script>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="inner-container" id="inner-container">
+      <!-- Error/Success Messages -->
+      <div id="auth-message" class="auth-message"></div>
+
+      <!-- Sign In -->
+      <div class="form-container signin">
+        <h2>Welcome Back</h2>
+        <form id="signin-form">
+          <input type="email" id="signin-email" placeholder="Email" required>
+          <input type="password" id="signin-password" placeholder="Password" required>
+          <button type="submit">Sign In</button>
+          <a href="#" id="forgot-password">Forgot Password?</a>
+        </form>
+        <button class="toggle-btn" onclick="flipCard()">Create Account</button>
+      </div>
+
+      <!-- Sign Up -->
+      <div class="form-container signup">
+        <h2>Create Account</h2>
+        <form id="signup-form">
+          <input type="text" id="signup-fname" placeholder="First Name" required>
+          <input type="text" id="signup-lname" placeholder="Last Name" required>
+          <input type="email" id="signup-email" placeholder="Email" required>
+          <input type="password" id="signup-password" placeholder="Password" required>
+          <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
+          <button type="submit">Sign Up</button>
+        </form>
+        <button class="toggle-btn" onclick="flipCard()">Existing User? Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function flipCard() {
+      document.getElementById('inner-container').classList.toggle('flipped');
+      document.getElementById('auth-message').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

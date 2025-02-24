@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users
+    match /users/{userId} {
+      allow read, update, delete: 
+        if request.auth != null && 
+        request.auth.uid == userId;
+      allow create: 
+        if request.auth == null;
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow read: 
+        if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: 
+        if request.auth != null;
+    }
+
+    // Services
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Contacts
+    match /contacts/{contactId} {
+      allow create: if true;
+      allow read: if request.auth != null;
+    }
+
+    // Affiliate Inquiries
+    match /affiliateInquiries/{inquiry} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null;
+    }
+
+    // Affiliate Brands
+    match /affiliateBrands/{brand} {
+      allow read: if true;
+    }
+
+    // Venues
+    match /venues/{venueId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Packages (Renamed to packageDetails)
+    match /packageDetails/{packageId} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
